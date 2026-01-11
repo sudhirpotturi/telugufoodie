@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telugu Foodie Recommendations</title>
+    <title>Foodie Recommendations</title>
     <style>
         :root {
             --primary-color: #e62117;
@@ -180,8 +180,8 @@
 <body>
 
 <header>
-    <h1>Telugu Foodie Trail</h1>
-    <p>Discover the best local eats (Live from Google Sheets)</p>
+    <h1>Indian Foodie Trail</h1>
+    <p>Discover the best local eats</p>
 </header>
 
 <div id="search-container">
@@ -197,51 +197,42 @@
     let allData = [];
 
     // 1. Fetch Data from Google Sheets
-    async function fetchSheetData() {
-    // Ensure sheetId is defined somewhere above this function!
+   async function fetchSheetData() {
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-
-    // DEBUG: Log the URL to the console so you can inspect it
-    console.log("Attempting to fetch:", url);
 
     try {
         const response = await fetch(url);
-        
-        // If the fetch worked but Google returned an error (like 404), throw here
-        if (!response.ok) {
-            throw new Error(`Server returned status: ${response.status}`);
-        }
-
         const text = await response.text();
         
-        // 1. Clean JSON
+        // Clean the Google "/*O_o*/" prefix
         const jsonText = text.substring(47).slice(0, -2);
         const json = JSON.parse(jsonText);
         
-        const rows = json.table.rows;
+        // --- CHANGE IS HERE ---
+        // json.table.rows contains all data. 
+        // .slice(1) creates a new array starting from the 2nd row, ignoring the header.
+        const rows = json.table.rows.slice(1);
         
-        // 2. Parse Rows
         allData = rows.map(row => {
             const c = row.c;
             const v = (index) => (c[index] ? c[index].v : "");
 
             return {
-                category:  v(0), 
-                item:      v(1), 
-                youtube:   v(2), 
-                placeName: v(3), 
-                place:     v(4), 
-                map:       v(5)  
+                category:  v(0),
+                item:      v(1),
+                youtube:   v(2),
+                placeName: v(3),
+                place:     v(4),
+                map:       v(5) 
             };
-        }).filter(item => item.youtube && item.item);
+        }).filter(item => item.youtube && item.item); // Filter out empty rows
 
         document.getElementById('loading').style.display = 'none';
         renderPage(allData);
 
     } catch (error) {
-        console.error("FULL ERROR DETAILS:", error);
-        // Display error on screen so you don't miss it
-        document.getElementById('loading').innerText = "Error loading data. Check console.";
+        console.error("Error fetching data:", error);
+        document.getElementById('loading').innerText = "Failed to load data.";
     }
 }
 
