@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telugu Foodie Recommendations</title>
+    <style>
+        :root {
+            --primary-color: #e62117;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* Search Bar Styles */
+        #search-container {
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            position: relative;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(230, 33, 23, 0.2);
+        }
+
+        /* Content Layout */
+        .category-section {
+            margin-bottom: 50px;
+        }
+
+        .category-title {
+            font-size: 24px;
+            border-bottom: 3px solid var(--primary-color);
+            display: inline-block;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .thumbnail-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+        }
+
+        .thumbnail-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-icon::after {
+            content: '';
+            border-style: solid;
+            border-width: 10px 0 10px 20px;
+            border-color: transparent transparent transparent white;
+            margin-left: 5px;
+        }
+
+        .card-content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #222;
+        }
+
+        .place-name {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .location {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .map-link {
+            display: inline-block;
+            text-decoration: none;
+            background-color: #4285F4;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .map-link:hover {
+            background-color: #3367D6;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Telugu Foodie Trail</h1>
+    <p>Discover the best local eats</p>
+</header>
+
+<div id="search-container">
+    <input type="text" id="search-input" placeholder="Search for food, places, or cities...">
+</div>
+
+<div id="content-area">
+    </div>
+
+<script>
+    // Data from the provided Google Sheet
+    const data = [
+        // Tiffins
+        { category: "Tiffins", item: "Idly", youtube: "https://www.youtube.com/watch?v=nxCqv3UbB7Y", placeName: "SSS Idly", place: "Vijayawada", map: "https://maps.app.goo.gl/B7CE7dqpdjLdSwLCA" },
+        { category: "Tiffins", item: "Pesarattu", youtube: "https://www.youtube.com/watch?v=_uSXlUxVXAM", placeName: "Sai Lakshmi Durga Tiffin Centre", place: "Tetagunta", map: "https://maps.app.goo.gl/bRYQ3mKxujofSKfT7" },
+        { category: "Tiffins", item: "Mysore Bajji", youtube: "https://www.youtube.com/watch?v=TEa8GTqclcg", placeName: "Sai Ram Tiffins", place: "Vijayawada", map: "https://maps.app.goo.gl/fgF5bgpJEmnuDjJM9" },
+        { category: "Tiffins", item: "Minapattu", youtube: "https://www.youtube.com/watch?v=kUzjbhC0OK0", placeName: "Mastan Hotel", place: "Ongole", map: "https://maps.app.goo.gl/NUagcgKibRRyBhmX7" },
+        { category: "Tiffins", item: "Puri", youtube: "https://www.youtube.com/watch?v=D2CpbYRM7LQ", placeName: "Saarangi", place: "Rajamundry", map: "https://maps.app.goo.gl/dRhwXt6wrZSJA4Do6" },
+        { category: "Tiffins", item: "Sambar Vada", youtube: "https://www.youtube.com/watch?v=Ds_YRMZy9H8", placeName: "Sathya Sai Tiffins", place: "Vijayawada", map: "https://maps.app.goo.gl/1Mvm9mfUyn9cbCuj6" },
+        { category: "Tiffins", item: "Dibba rotte", youtube: "https://www.youtube.com/watch?v=HGHTM9lCMjA", placeName: "Abbi reddy Thatha", place: "Mukkamala", map: "https://maps.app.goo.gl/31nfd9WehEMYhCkC8" },
+        { category: "Tiffins", item: "Pottikalu", youtube: "https://www.youtube.com/watch?v=Mt997Bseo_0", placeName: "RK Tiffins", place: "Ravulapalem", map: "https://maps.app.goo.gl/9VLE1dT9Nyz6dYSq9" },
+        { category: "Tiffins", item: "Benne Dosa", youtube: "https://www.youtube.com/watch?v=6NDURx8iFqM", placeName: "Sri Guru Kottureshwara Butter Dosa Hotel", place: "Davanegere", map: "https://maps.app.goo.gl/pa6qkCjWFPie2Xv39" },
+        { category: "Tiffins", item: "Masala Dosa", youtube: "https://www.youtube.com/watch?v=Ylb6ISVUxLY", placeName: "CTR", place: "Bangalore", map: "https://maps.app.goo.gl/NfY4LGQBzMrVpEVB8" },
+        { category: "Tiffins", item: "Pongal", youtube: "https://www.youtube.com/watch?v=Aah7VlEPwYU", placeName: "Rayars Mess", place: "Chennai", map: "https://maps.app.goo.gl/Tv9XWt1HiN6o87xu5" },
+        
+        // Sweets
+        { category: "Sweets", item: "Utanki", youtube: "https://www.youtube.com/watch?v=oYrbuFEQxRI", placeName: "Utanki Srinivasa Rao", place: "Sompeta", map: "https://maps.app.goo.gl/PvwrpYdcMmNHe54w9" },
+        { category: "Sweets", item: "Mysorepak", youtube: "https://www.youtube.com/watch?v=9LJ5aot5GOk", placeName: "Alluraiah Sweets", place: "Ongole", map: "https://maps.app.goo.gl/me1uyUYA9ttgjB4m6" },
+        { category: "Sweets", item: "Garajilu", youtube: "https://www.youtube.com/watch?v=zLPwSC0VKrE", placeName: "Konaseema Garajilu", place: "Nagaram", map: "https://maps.app.goo.gl/rHdzmYZK3mVHxbFJ6" },
+        { category: "Sweets", item: "Putharekulu", youtube: "https://www.youtube.com/watch?v=QtHOquc9vRY", placeName: "Bhagavan Pootharekulu", place: "Manchili", map: "https://maps.app.goo.gl/krniUhRGxRg2Drq28" },
+        { category: "Sweets", item: "Palakova", youtube: "https://www.youtube.com/watch?v=comqYYTxqwA", placeName: "The Kalahasthi Co-operative Milk Society", place: "Sri Kalahasti", map: "https://maps.app.goo.gl/enTVbPFU6ATYPvRQ99" },
+        { category: "Sweets", item: "Kandriga Palakova", youtube: "https://www.youtube.com/watch?v=ofabIt-Fhfo", placeName: "Aadi Lakshmi Sweets", place: "Amalapuram", map: "https://maps.app.goo.gl/MEdtyygkrSuabAzH9" },
+        { category: "Sweets", item: "Gottam Kaja", youtube: "https://www.youtube.com/watch?v=Yeuvh_8XmvQ", placeName: "Kotaiah Sweets", place: "Kakinada", map: "https://maps.app.goo.gl/CvyGGFaMRxLsD4678" },
+        { category: "Sweets", item: "Jouzi Ka Halwa", youtube: "https://www.youtube.com/watch?v=ApNbnKJhQe8", placeName: "Hameedi Confectioners", place: "Hyderabad", map: "https://maps.app.goo.gl/j8AdVL3HjwqUVGEA8" },
+        { category: "Sweets", item: "Madatha kaja", youtube: "https://www.youtube.com/watch?v=J0Y_UjGo3M4", placeName: "Honey Foods", place: "Tapeswaram", map: "https://maps.app.goo.gl/KHJtPF3zhciV4JE17" },
+        
+        // Snacks
+        { category: "Snacks", item: "Vankaya Bajji", youtube: "https://www.youtube.com/watch?v=LVYAZ-osO50", placeName: "Famous Vankaya Bajji", place: "Guntur", map: "https://maps.app.goo.gl/JCiZPEvfAj8yCrvW8" },
+        { category: "Snacks", item: "Punugulu", youtube: "https://www.youtube.com/watch?v=_08ctXVi2rc", placeName: "Satyanarayanapuram", place: "Vijayawada", map: "https://maps.app.goo.gl/sFqDYn2czaVcjqpd9" },
+        { category: "Snacks", item: "Mirchi Bajji", youtube: "https://www.youtube.com/watch?v=P9m8oeyK2zQ", placeName: "Purna Bajji Center", place: "Guntur", map: "https://maps.app.goo.gl/YBZdMJi9K6yNcmxB7" },
+        { category: "Snacks", item: "Bajji Mixture", youtube: "https://www.youtube.com/watch?v=lU4ronELFJE", placeName: "Tenali Mixture Point", place: "Bhimavaram", map: "https://maps.app.goo.gl/eSjpXQj1hic4kewD8" },
+        { category: "Snacks", item: "Chekodeelu", youtube: "https://www.youtube.com/watch?v=88JXebIffMc", placeName: "Nagasurya Foods", place: "Narayanalanka", map: "https://maps.app.goo.gl/cPSqoRpMoEhHWTyX7" },
+        
+        // Drinks
+        { category: "Drinks", item: "Rose Milk", youtube: "https://www.youtube.com/watch?v=r5jpV0dA-lA", placeName: "Rajamundry Rose Milk Center", place: "Rajamundry", map: "https://maps.app.goo.gl/NCpXQ68CD8SKHXPQ8" },
+        { category: "Drinks", item: "Badam Milk", youtube: "https://www.youtube.com/watch?v=rvxnroR66Cc", placeName: "Old Apsara Badam Milk", place: "Machilipatnam", map: "https://maps.app.goo.gl/DHkXZWavB1DdxLscA" },
+    ];
+
+    function getYouTubeID(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function renderPage(items) {
+        const contentArea = document.getElementById('content-area');
+        contentArea.innerHTML = ''; // Clear existing content
+
+        // Group by category
+        const categories = {};
+        items.forEach(item => {
+            if (!categories[item.category]) {
+                categories[item.category] = [];
+            }
+            categories[item.category].push(item);
+        });
+
+        // Render each category
+        for (const [categoryName, categoryItems] of Object.entries(categories)) {
+            const section = document.createElement('div');
+            section.className = 'category-section';
+
+            const title = document.createElement('div');
+            title.className = 'category-title';
+            title.textContent = categoryName;
+            section.appendChild(title);
+
+            const grid = document.createElement('div');
+            grid.className = 'grid-container';
+
+            categoryItems.forEach(item => {
+                const videoID = getYouTubeID(item.youtube);
+                const thumbnail = `https://img.youtube.com/vi/${videoID}/mqdefault.jpg`;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <a href="${item.youtube}" target="_blank" class="thumbnail-container">
+                        <img src="${thumbnail}" alt="${item.item}" class="thumbnail-img">
+                        <div class="play-icon"></div>
+                    </a>
+                    <div class="card-content">
+                        <h3 class="item-name">${item.item}</h3>
+                        <div class="place-name">📍 ${item.placeName}</div>
+                        <div class="location">${item.place}</div>
+                        <a href="${item.map}" target="_blank" class="map-link">View on Maps</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            contentArea.appendChild(section);
+        }
+    }
+
+    // Search Functionality
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        const filteredData = data.filter(item => {
+            return item.item.toLowerCase().includes(searchTerm) || 
+                   item.placeName.toLowerCase().includes(searchTerm) || 
+                   item.place.toLowerCase().includes(searchTerm) ||
+                   item.category.toLowerCase().includes(searchTerm);
+        });
+
+        renderPage(filteredData);
+    });
+
+    // Initial Render
+    renderPage(data);
+
+</script>
+
+</body>
+</html>
