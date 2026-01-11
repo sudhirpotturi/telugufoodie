@@ -30,7 +30,7 @@
             margin-bottom: 10px;
         }
 
-        /* Search Bar Styles */
+        /* Search Bar */
         #search-container {
             max-width: 600px;
             margin: 0 auto 30px auto;
@@ -51,6 +51,14 @@
         #search-input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 8px rgba(230, 33, 23, 0.2);
+        }
+
+        /* Loading Spinner */
+        #loading {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-top: 50px;
         }
 
         /* Content Layout */
@@ -92,6 +100,7 @@
             width: 100%;
             padding-top: 56.25%; /* 16:9 Aspect Ratio */
             background-color: #000;
+            display: block;
         }
 
         .thumbnail-img {
@@ -166,74 +175,88 @@
         .map-link:hover {
             background-color: #3367D6;
         }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
 
 <header>
     <h1>Telugu Foodie Trail</h1>
-    <p>Discover the best local eats</p>
+    <p>Discover the best local eats (Live from Google Sheets)</p>
 </header>
 
 <div id="search-container">
     <input type="text" id="search-input" placeholder="Search for food, places, or cities...">
 </div>
 
-<div id="content-area">
-    </div>
+<div id="loading">Loading tasty data...</div>
+<div id="content-area"></div>
 
 <script>
-    // Data from the provided Google Sheet
-    const data = [
-        // Tiffins
-        { category: "Tiffins", item: "Idly", youtube: "https://www.youtube.com/watch?v=nxCqv3UbB7Y", placeName: "SSS Idly", place: "Vijayawada", map: "https://maps.app.goo.gl/B7CE7dqpdjLdSwLCA" },
-        { category: "Tiffins", item: "Pesarattu", youtube: "https://www.youtube.com/watch?v=_uSXlUxVXAM", placeName: "Sai Lakshmi Durga Tiffin Centre", place: "Tetagunta", map: "https://maps.app.goo.gl/bRYQ3mKxujofSKfT7" },
-        { category: "Tiffins", item: "Mysore Bajji", youtube: "https://www.youtube.com/watch?v=TEa8GTqclcg", placeName: "Sai Ram Tiffins", place: "Vijayawada", map: "https://maps.app.goo.gl/fgF5bgpJEmnuDjJM9" },
-        { category: "Tiffins", item: "Minapattu", youtube: "https://www.youtube.com/watch?v=kUzjbhC0OK0", placeName: "Mastan Hotel", place: "Ongole", map: "https://maps.app.goo.gl/NUagcgKibRRyBhmX7" },
-        { category: "Tiffins", item: "Puri", youtube: "https://www.youtube.com/watch?v=D2CpbYRM7LQ", placeName: "Saarangi", place: "Rajamundry", map: "https://maps.app.goo.gl/dRhwXt6wrZSJA4Do6" },
-        { category: "Tiffins", item: "Sambar Vada", youtube: "https://www.youtube.com/watch?v=Ds_YRMZy9H8", placeName: "Sathya Sai Tiffins", place: "Vijayawada", map: "https://maps.app.goo.gl/1Mvm9mfUyn9cbCuj6" },
-        { category: "Tiffins", item: "Dibba rotte", youtube: "https://www.youtube.com/watch?v=HGHTM9lCMjA", placeName: "Abbi reddy Thatha", place: "Mukkamala", map: "https://maps.app.goo.gl/31nfd9WehEMYhCkC8" },
-        { category: "Tiffins", item: "Pottikalu", youtube: "https://www.youtube.com/watch?v=Mt997Bseo_0", placeName: "RK Tiffins", place: "Ravulapalem", map: "https://maps.app.goo.gl/9VLE1dT9Nyz6dYSq9" },
-        { category: "Tiffins", item: "Benne Dosa", youtube: "https://www.youtube.com/watch?v=6NDURx8iFqM", placeName: "Sri Guru Kottureshwara Butter Dosa Hotel", place: "Davanegere", map: "https://maps.app.goo.gl/pa6qkCjWFPie2Xv39" },
-        { category: "Tiffins", item: "Masala Dosa", youtube: "https://www.youtube.com/watch?v=Ylb6ISVUxLY", placeName: "CTR", place: "Bangalore", map: "https://maps.app.goo.gl/NfY4LGQBzMrVpEVB8" },
-        { category: "Tiffins", item: "Pongal", youtube: "https://www.youtube.com/watch?v=Aah7VlEPwYU", placeName: "Rayars Mess", place: "Chennai", map: "https://maps.app.goo.gl/Tv9XWt1HiN6o87xu5" },
-        
-        // Sweets
-        { category: "Sweets", item: "Utanki", youtube: "https://www.youtube.com/watch?v=oYrbuFEQxRI", placeName: "Utanki Srinivasa Rao", place: "Sompeta", map: "https://maps.app.goo.gl/PvwrpYdcMmNHe54w9" },
-        { category: "Sweets", item: "Mysorepak", youtube: "https://www.youtube.com/watch?v=9LJ5aot5GOk", placeName: "Alluraiah Sweets", place: "Ongole", map: "https://maps.app.goo.gl/me1uyUYA9ttgjB4m6" },
-        { category: "Sweets", item: "Garajilu", youtube: "https://www.youtube.com/watch?v=zLPwSC0VKrE", placeName: "Konaseema Garajilu", place: "Nagaram", map: "https://maps.app.goo.gl/rHdzmYZK3mVHxbFJ6" },
-        { category: "Sweets", item: "Putharekulu", youtube: "https://www.youtube.com/watch?v=QtHOquc9vRY", placeName: "Bhagavan Pootharekulu", place: "Manchili", map: "https://maps.app.goo.gl/krniUhRGxRg2Drq28" },
-        { category: "Sweets", item: "Palakova", youtube: "https://www.youtube.com/watch?v=comqYYTxqwA", placeName: "The Kalahasthi Co-operative Milk Society", place: "Sri Kalahasti", map: "https://maps.app.goo.gl/enTVbPFU6ATYPvRQ99" },
-        { category: "Sweets", item: "Kandriga Palakova", youtube: "https://www.youtube.com/watch?v=ofabIt-Fhfo", placeName: "Aadi Lakshmi Sweets", place: "Amalapuram", map: "https://maps.app.goo.gl/MEdtyygkrSuabAzH9" },
-        { category: "Sweets", item: "Gottam Kaja", youtube: "https://www.youtube.com/watch?v=Yeuvh_8XmvQ", placeName: "Kotaiah Sweets", place: "Kakinada", map: "https://maps.app.goo.gl/CvyGGFaMRxLsD4678" },
-        { category: "Sweets", item: "Jouzi Ka Halwa", youtube: "https://www.youtube.com/watch?v=ApNbnKJhQe8", placeName: "Hameedi Confectioners", place: "Hyderabad", map: "https://maps.app.goo.gl/j8AdVL3HjwqUVGEA8" },
-        { category: "Sweets", item: "Madatha kaja", youtube: "https://www.youtube.com/watch?v=J0Y_UjGo3M4", placeName: "Honey Foods", place: "Tapeswaram", map: "https://maps.app.goo.gl/KHJtPF3zhciV4JE17" },
-        
-        // Snacks
-        { category: "Snacks", item: "Vankaya Bajji", youtube: "https://www.youtube.com/watch?v=LVYAZ-osO50", placeName: "Famous Vankaya Bajji", place: "Guntur", map: "https://maps.app.goo.gl/JCiZPEvfAj8yCrvW8" },
-        { category: "Snacks", item: "Punugulu", youtube: "https://www.youtube.com/watch?v=_08ctXVi2rc", placeName: "Satyanarayanapuram", place: "Vijayawada", map: "https://maps.app.goo.gl/sFqDYn2czaVcjqpd9" },
-        { category: "Snacks", item: "Mirchi Bajji", youtube: "https://www.youtube.com/watch?v=P9m8oeyK2zQ", placeName: "Purna Bajji Center", place: "Guntur", map: "https://maps.app.goo.gl/YBZdMJi9K6yNcmxB7" },
-        { category: "Snacks", item: "Bajji Mixture", youtube: "https://www.youtube.com/watch?v=lU4ronELFJE", placeName: "Tenali Mixture Point", place: "Bhimavaram", map: "https://maps.app.goo.gl/eSjpXQj1hic4kewD8" },
-        { category: "Snacks", item: "Chekodeelu", youtube: "https://www.youtube.com/watch?v=88JXebIffMc", placeName: "Nagasurya Foods", place: "Narayanalanka", map: "https://maps.app.goo.gl/cPSqoRpMoEhHWTyX7" },
-        
-        // Drinks
-        { category: "Drinks", item: "Rose Milk", youtube: "https://www.youtube.com/watch?v=r5jpV0dA-lA", placeName: "Rajamundry Rose Milk Center", place: "Rajamundry", map: "https://maps.app.goo.gl/NCpXQ68CD8SKHXPQ8" },
-        { category: "Drinks", item: "Badam Milk", youtube: "https://www.youtube.com/watch?v=rvxnroR66Cc", placeName: "Old Apsara Badam Milk", place: "Machilipatnam", map: "https://maps.app.goo.gl/DHkXZWavB1DdxLscA" },
-    ];
+    // YOUR SHEET ID
+    const sheetId = '1cDUa7XkuWJutYoD8xgsBwQcrEkUTllsW0zHWY7cJivk'; 
+    let allData = [];
 
+    // 1. Fetch Data from Google Sheets
+    async function fetchSheetData() {
+    // Ensure sheetId is defined somewhere above this function!
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+    // DEBUG: Log the URL to the console so you can inspect it
+    console.log("Attempting to fetch:", url);
+
+    try {
+        const response = await fetch(url);
+        
+        // If the fetch worked but Google returned an error (like 404), throw here
+        if (!response.ok) {
+            throw new Error(`Server returned status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        
+        // 1. Clean JSON
+        const jsonText = text.substring(47).slice(0, -2);
+        const json = JSON.parse(jsonText);
+        
+        const rows = json.table.rows;
+        
+        // 2. Parse Rows
+        allData = rows.map(row => {
+            const c = row.c;
+            const v = (index) => (c[index] ? c[index].v : "");
+
+            return {
+                category:  v(0), 
+                item:      v(1), 
+                youtube:   v(2), 
+                placeName: v(3), 
+                place:     v(4), 
+                map:       v(5)  
+            };
+        }).filter(item => item.youtube && item.item);
+
+        document.getElementById('loading').style.display = 'none';
+        renderPage(allData);
+
+    } catch (error) {
+        console.error("FULL ERROR DETAILS:", error);
+        // Display error on screen so you don't miss it
+        document.getElementById('loading').innerText = "Error loading data. Check console.";
+    }
+}
+
+    // 3. Helper to get YouTube ID
     function getYouTubeID(url) {
+        if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
     }
 
+    // 4. Render the Page
     function renderPage(items) {
         const contentArea = document.getElementById('content-area');
-        contentArea.innerHTML = ''; // Clear existing content
+        contentArea.innerHTML = ''; 
 
         // Group by category
         const categories = {};
@@ -259,7 +282,7 @@
 
             categoryItems.forEach(item => {
                 const videoID = getYouTubeID(item.youtube);
-                const thumbnail = `https://img.youtube.com/vi/${videoID}/mqdefault.jpg`;
+                const thumbnail = videoID ? `https://img.youtube.com/vi/${videoID}/mqdefault.jpg` : 'https://via.placeholder.com/320x180?text=No+Video';
                 
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -283,23 +306,22 @@
         }
     }
 
-    // Search Functionality
-    const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', (e) => {
+    // 5. Search Functionality
+    document.getElementById('search-input').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         
-        const filteredData = data.filter(item => {
-            return item.item.toLowerCase().includes(searchTerm) || 
-                   item.placeName.toLowerCase().includes(searchTerm) || 
-                   item.place.toLowerCase().includes(searchTerm) ||
-                   item.category.toLowerCase().includes(searchTerm);
+        const filteredData = allData.filter(item => {
+            return (item.item || "").toLowerCase().includes(searchTerm) || 
+                   (item.placeName || "").toLowerCase().includes(searchTerm) || 
+                   (item.place || "").toLowerCase().includes(searchTerm) ||
+                   (item.category || "").toLowerCase().includes(searchTerm);
         });
 
         renderPage(filteredData);
     });
 
-    // Initial Render
-    renderPage(data);
+    // Start Fetching
+    fetchSheetData();
 
 </script>
 
